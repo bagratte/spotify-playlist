@@ -107,7 +107,8 @@ if __name__ == "__main__":
     parser.add_argument("-t", "--trace", action="store_true", default=False)
     parser.add_argument("-a", "--action", choices=["add", "remove"],
                         default="add")
-    parser.add_argument("--total", action="store_true", default=False)
+    parser.add_argument("--total", action="store_true", default=False,
+                        help="Print total number of tracks by artist on Spotify")
     args = parser.parse_args()
 
     sp.trace = args.trace
