@@ -2,7 +2,6 @@
 
 import argparse
 import os
-import sys
 
 import spotipy
 import spotipy.util
@@ -102,19 +101,18 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(
         description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter
     )
-    parser.add_argument("artist_ids", action="append",
-                        help="List of spotify artist ID's")
-    parser.add_argument("-t", "--trace", action="store_true", default=False)
-    parser.add_argument("-a", "--action", choices=["add", "remove"],
-                        default="add")
-    parser.add_argument("--total", action="store_true", default=False,
-                        help="Print total number of tracks by artist on Spotify")
+    parser.add_argument("-a", "--add", metavar="ARTIST_URI")
+    parser.add_argument("-r", "--remove", metavar="ARTIST_URI")
+    parser.add_argument("-t", "--total", metavar="ARTIST_URI")
+    parser.add_argument("-c", "--trace", action="store_true", default=False)
     args = parser.parse_args()
 
     sp.trace = args.trace
+    if args.add:
+        unfilled_id = unfilled_playlist()
+        artists_playlist(unfilled_id, [args.add], "add")
+    if args.remove:
+        unfilled_id = unfilled_playlist()
+        artists_playlist(unfilled_id, [args.add], "remove")
     if args.total:
-        for artist_id in args.artist_ids:
-            print(total_tracks_by_artist(artist_id))
-        sys.exit(0)
-    unfilled_id = unfilled_playlist()
-    artists_playlist(unfilled_id, args.artist_ids, args.action)
+        print(total_tracks_by_artist(args.total))
