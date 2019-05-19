@@ -77,13 +77,11 @@ def albums_playlist(playlist_id, album_ids, action):
 def artists_playlist(playlist_id, artist_ids, action):
     actions = {
         "add": {
-            "action": sp.user_playlist_add_tracks,
             "message": "Adding {} to {}...",
             "diff": lambda before, after: after - before,
             "diffverb": "Added"
         },
         "remove": {
-            "action": sp.user_playlist_remove_all_occurrences_of_tracks,
             "message": "Removing {} from {}...",
             "diff": lambda before, after: before - after,
             "diffverb": "Removed"
@@ -93,35 +91,24 @@ def artists_playlist(playlist_id, artist_ids, action):
         raise ValueError(
             "action must be on of {}".format("/".join(actions.keys()))
         )
-    action = actions[action]
 
     for artist_id in artist_ids:
         artist_name = sp.artist(artist_id)["name"]
         playlist = sp.user_playlist("bagratte", playlist_id)
         playlist_name = playlist["name"]
-        print(action["message"].format(artist_name, playlist_name))
+        print(actions[action]["message"].format(artist_name, playlist_name))
         sp.user_follow_artists([artist_id])
         albums = paginate_all(sp.artist_albums, artist_id,
                               album_type="album,single,compilation")
 
         before = int(playlist["tracks"]["total"])
-        total = 0
-        for album in albums:
-            r = sp.album_tracks(album["id"])
-            total += r["total"]
-            track_ids = [t["id"] for t in r["items"]]
-            action["action"]("bagratte", playlist_id, track_ids)
-            while r["next"]:
-                r = sp.next(r)
-                track_ids = [t["id"] for t in r["items"]]
-                action["action"]("bagratte", playlist_id, track_ids)
-
+        added = albums_playlist(playlist_id, (a["id"] for a in albums), action)
         playlist = sp.user_playlist("bagratte", playlist_id)
         after = int(playlist["tracks"]["total"])
-        diff = action["diff"](before, after)
-        if diff != total:
+        diff = actions[action]["diff"](before, after)
+        if diff != added:
             print("WARNING:", end=" ")
-        print(f'{action["diffverb"]} {diff} of {total} tracks to {playlist_name}.')
+        print(f'{actions[action]["diffverb"]} {diff} of {added} tracks to {playlist_name}.')
         print(f"{playlist_name} contains {after} tracks.")
 
 def sync():
