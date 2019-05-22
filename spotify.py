@@ -15,7 +15,12 @@ os.environ["SPOTIPY_CLIENT_ID"] = "7f905930cf3848e2b53b59e5cf9bca72"
 os.environ["SPOTIPY_CLIENT_SECRET"] = "82b0b7e333d344959247b733287e82d7"
 os.environ["SPOTIPY_REDIRECT_URI"] = "http://localhost/"
 scope = "playlist-read-private,playlist-modify-private,user-follow-read,user-follow-modify"
-token = spotipy.util.prompt_for_user_token("bagratte", scope)
+cache_dir = f"{os.path.expanduser('~')}/.spotipy"
+os.makedirs(cache_dir, exist_ok=True)
+cache_path = os.path.join(cache_dir, "bagratte")
+token = spotipy.util.prompt_for_user_token("bagratte",
+                                           scope,
+                                           cache_path=cache_path)
 if token:
     sp = spotipy.Spotify(auth=token)
 else:
