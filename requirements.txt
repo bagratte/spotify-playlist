@@ -1,0 +1,1 @@
+git+git@github.com:plamere/spotipy.git@4c2c1d763a3653aa225c4af848409ec31286a6bf#egg=spotipy
