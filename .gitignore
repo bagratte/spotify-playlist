@@ -1,3 +1,4 @@
 .cache-bagratte
 __pycache__
 venv
+.vscode
