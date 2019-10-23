@@ -143,6 +143,29 @@ def sync():
             message = f'Added {album["name"]} by {", ".join(artists)}'
             notify(message)
 
+def fav_to_omnis():
+    playlists = paginate_all(sp.current_user_playlists)
+    favorites = [p for p in playlists if p["name"] == "favorites"][0]["id"]
+    track_ids_0 = {
+        i["track"]["id"]
+        for i in paginate_all(sp._get, f'playlists/{favorites}/tracks', fields="next,items(track.id)")
+    }
+    omnis = [
+        p for p in paginate_all(sp.current_user_playlists)
+        if p["name"].startswith("omnis-")
+    ]
+    track_ids_1 = {
+        i["track"]["id"]
+        for p in omnis
+        for i in paginate_all(sp._get,
+                              f'playlists/{p["id"]}/tracks',
+                              fields="next,items(track.id)")
+    }
+    diff = track_ids_0 - track_ids_1
+    print(diff)
+    unfilled_id = unfilled_playlist()
+    sp.user_playlist_add_tracks("bagratte", unfilled_id, diff)
+
 def notify(message):
     try:
         subprocess.run(["notify-send", "Spotify Sync", message])
