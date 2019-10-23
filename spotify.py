@@ -102,7 +102,6 @@ def artists_playlist(playlist_id, artist_ids, action):
         playlist = sp.user_playlist("bagratte", playlist_id)
         playlist_name = playlist["name"]
         print(actions[action]["message"].format(artist_name, playlist_name))
-        sp.user_follow_artists([artist_id])
         albums = paginate_all(sp.artist_albums, artist_id,
                               album_type="album,single,compilation")
 
@@ -164,11 +163,17 @@ if __name__ == "__main__":
 
     sp.trace = args.trace
     if args.add:
+        sp.user_follow_artists([args.add])
         unfilled_id = unfilled_playlist()
         artists_playlist(unfilled_id, [args.add], "add")
     if args.remove:
-        unfilled_id = unfilled_playlist()
-        artists_playlist(unfilled_id, [args.remove], "remove")
+        sp.user_unfollow_artists([args.remove])
+        omnis = [
+            p for p in paginate_all(sp.current_user_playlists)
+            if p["name"].startswith("omnis-")
+        ]
+        for playlist_id in omnis:
+            artists_playlist(playlist_id, [args.remove], "remove")
     if args.total:
         print(total_tracks_by_artist(args.total))
     if args.sync:
